@@ -176,6 +176,7 @@ src/canvas-yaml/Header.component.yaml
 
 These reference files do not automatically synchronise with Power Apps. Review suggested changes and manually apply approved changes in Power Apps Studio, then save and test the app.
 
+# If you use VSCODE, just sync with the published version number and ignore Git basics below
 ## Git basics
 
 Run Git commands from the repository root.
