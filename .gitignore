@@ -1,0 +1,4 @@
+working/input/*
+!working/input/.gitkeep
+working/output/*
+!working/output/.gitkeep
