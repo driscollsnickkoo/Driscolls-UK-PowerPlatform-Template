@@ -4,7 +4,7 @@
 - Preserve existing working logic wherever possible and make the smallest necessary change.
 - Do not create folders without a clear reason or invent application logic.
 - Keep explanations friendly to someone learning Git, GitHub, VS Code, and PAC CLI.
-- Canvas Apps may use SharePoint or other data sources; do not assume Dataverse is the application's data source.
+- Canvas Apps may use SharePoint or other data sources; do not assume Dataverse is the application's data source. Highlight it if Dataverse is used.
 - Read `docs/project-overview.md` and `docs/business-rules.md` before recommending significant application changes.
 - Treat `src/solution/` as Power Platform solution source for the PAC CLI workflow.
 - Treat `src/canvas-yaml/` as clean, protected Canvas App source/reference material.
