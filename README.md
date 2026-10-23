@@ -7,8 +7,6 @@ Simple, beginner-friendly starting template for Microsoft Power Platform develop
 On GitHub, choose **Use this template → Create a new repository**, name your project, then clone your new repository and open it in VS Code.
 Fill in the documents under `docs/` before adding real application material.
 
-If **Use this template** is missing, the repository owner must enable **Settings → General → Template repository** on this repository first.
-
 ## Structure
 
 ```text
