@@ -6,6 +6,8 @@
 - Keep explanations friendly to someone learning Git, GitHub, VS Code, and PAC CLI.
 - Canvas Apps may use SharePoint or other data sources; do not assume Dataverse is the application's data source. Highlight it if Dataverse is used.
 - Read `docs/project-overview.md` and `docs/business-rules.md` before recommending significant application changes.
+- Treat `docs/data-sources.md` as the canonical reference for project data structures and data-source schema details when available.
+- If `docs/data-sources.md` contains placeholders or is incomplete, clearly state assumptions and recommend updating it before structural data changes.
 - Treat `src/solution/` as Power Platform solution source for the PAC CLI workflow.
 - Treat `src/canvas-yaml/` as clean, protected Canvas App source/reference material.
 - Screen and component YAML may live directly under `src/canvas-yaml/`.
