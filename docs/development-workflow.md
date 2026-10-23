@@ -11,8 +11,9 @@ Start small: there is no automated deployment in this template.
 | Live Power Platform application | The application running in a Power Platform environment; editing a local reference file does not change it. |
 | Exported Power Platform solution | A ZIP package exported from Power Platform containing the solution's included components, not a backup of all external data or dependencies. |
 | `src/solution/` | Unpacked Power Platform solution source used with PAC CLI and Git. |
-| `src/canvas-yaml/` | Clean readable screen/component YAML and important Power Fx for reference, review, Git history, and Copilot assistance. Screen and component YAML can later live directly here. |
+| `src/canvas-yaml/` | Clean readable screen/component YAML and important Power Fx for reference, review, Git history, and Copilot assistance. Screen and component YAML can later live directly here or under subfolders by convention. |
 | `src/canvas-yaml/app/` | Application-level formulas in `App.OnStart.fx` and `App.Formulas.fx`. |
+| `docs/data-sources.md` | Canonical documentation of the SharePoint lists or other data sources used by the project, including key list/table structure and column definitions. |
 | `working/input/` | Temporary Power Fx, control YAML, partial screen YAML, or other snippets supplied for troubleshooting. |
 | `working/output/` | Temporary proposed corrections/results; also a convenient ignored location for local solution ZIPs. |
 
@@ -25,11 +26,21 @@ Git ignores temporary contents of `working/input/` and `working/output/`, retain
 Ignored files are not backups: do not keep your only important copy there or force-add temporary files.
 Never include passwords, tokens, connection secrets, or sensitive business data in shared files/snippets.
 
+## Project documentation baseline
+
+Before significant app changes, complete and maintain:
+
+1. [Project overview](project-overview.md)
+2. [Business rules](business-rules.md)
+3. [Data sources](data-sources.md)
+
+Use `docs/data-sources.md` as the primary reference for project structure and data source details. It should describe the actual SharePoint lists or other data stores the app depends on, including key columns and relationships where relevant. If information is not known, record `Unknown` instead of guessing.
+
 ## Starting a new application
 
 1. On GitHub, use this template to create a **new project repository**, rather than building the application in the template repository.
 2. Clone the new repository to your computer (GitHub's **Code** menu provides its URL); open that local folder in VS Code.
-3. Fill in [Project overview](project-overview.md) and [Business rules](business-rules.md).
+3. Fill in [Project overview](project-overview.md), [Business rules](business-rules.md), and [Data sources](data-sources.md).
 4. Build, save, and test the application in your Power Platform DEV environment.
 5. When ready to track solution source, include the app and relevant components in an unmanaged solution in DEV, then export and unpack it using PAC CLI as described below.
 6. Preserve useful, deliberately maintained Canvas YAML/Power Fx references separately under `src/canvas-yaml/`; review local changes, commit with Git, and push to GitHub.
@@ -47,7 +58,7 @@ flowchart TD
 ## Bringing an existing application into Git
 
 1. Create a project repository from this template, clone it, and open it in VS Code.
-2. Record the existing application's purpose, data sources, and rules in `docs/`.
+2. Record the existing application's purpose, data sources, and rules in `docs/`; use `docs/data-sources.md` as the canonical list/table schema reference.
 3. In the existing DEV environment, find or create an unmanaged solution and add the existing Canvas App and relevant dependencies; do not recreate the app.
 4. Save and test the app, export the solution, and use PAC CLI to unpack it into `src/solution/`.
 5. Optionally preserve selected readable YAML and important Power Fx under `src/canvas-yaml/`, keeping their reference role clear.
@@ -70,7 +81,7 @@ Exports do not automatically include external SharePoint data, credentials, or e
 
 ## PAC CLI: the small command set
 
-Install Git, VS Code, and [Microsoft Power Platform CLI](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction) first; the Microsoft Power Platform Tools extension for VS Code is one installation option.
+Install Git, VS Code, and [Microsoft Power Platform CLI](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction) first; the Microsoft Power Platform Tools extension for VS Code is optional.
 Open a terminal at the **project repository root**, where `README.md` is located.
 Commands below use paths relative to that root and show one unmanaged DEV solution.
 Run only the commands you need, not the whole section blindly.
@@ -143,7 +154,7 @@ Keep `"src/solution"` unchanged.
 Packing does **not** import, deploy, or change any live environment, and it does not include separately maintained `src/canvas-yaml/` files.
 Do not treat the packed ZIP as permission to overwrite an environment; deployment is outside this beginner workflow.
 
-For current options, see Microsoft's [auth](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/auth), [org](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/org), and [solution](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution) command references.
+For current options, see Microsoft's [auth](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/auth), [org](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/org), and [solution](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution) command reference pages.
 
 ## Git basics
 
