@@ -1,224 +1,278 @@
 # Development workflow
 
-Power Apps is where you build and test the live application.
-VS Code is where you review local files; Git records their history and GitHub keeps a shared copy.
-Start small: there is no automated deployment in this template.
+## Purpose
 
-## Know the different areas
+Build and test the application in Power Apps Studio. Use PAC CLI to copy the current DEV solution into `src/solution/`. Use Git and GitHub to review, record and share changes.
 
-| Area | Purpose |
-| --- | --- |
-| Live Power Platform application | The application running in a Power Platform environment; editing a local reference file does not change it. |
-| Exported Power Platform solution | A ZIP package exported from Power Platform containing the solution's included components, not a backup of all external data or dependencies. |
-| `src/solution/` | Unpacked Power Platform solution source used with PAC CLI and Git. |
-| `src/canvas-yaml/` | Clean readable screen/component YAML and important Power Fx for reference, review, Git history, and Copilot assistance. Screen and component YAML can later live directly here or under subfolders by convention. |
-| `src/canvas-yaml/app/` | Application-level formulas in `App.OnStart.fx` and `App.Formulas.fx`. |
-| `docs/data-sources.md` | Canonical documentation of the SharePoint lists or other data sources used by the project, including key list/table structure and column definitions. |
-| `working/input/` | Temporary Power Fx, control YAML, partial screen YAML, or other snippets supplied for troubleshooting. |
-| `working/output/` | Temporary proposed corrections/results; also a convenient ignored location for local solution ZIPs. |
-
-The application formula files start with comments only; this template contains no screens, components, or application logic.
-Manually maintained reference files do **not** magically synchronise with Power Apps or with unpacked solution files.
-Review changes and manually apply approved reference fixes in Power Apps, then save and test.
-
-`src` means preserve by default; `working` means safe to experiment.
-Git ignores temporary contents of `working/input/` and `working/output/`, retaining only their `.gitkeep` placeholders.
-Ignored files are not backups: do not keep your only important copy there or force-add temporary files.
-Never include passwords, tokens, connection secrets, or sensitive business data in shared files/snippets.
-
-## Project documentation baseline
-
-Before significant app changes, complete and maintain:
-
-1. [Project overview](project-overview.md)
-2. [Business rules](business-rules.md)
-3. [Data sources](data-sources.md)
-
-Use `docs/data-sources.md` as the primary reference for project structure and data source details. It should describe the actual SharePoint lists or other data stores the app depends on, including key columns and relationships where relevant. If information is not known, record `Unknown` instead of guessing.
-
-## Starting a new application
-
-1. On GitHub, use this template to create a **new project repository**, rather than building the application in the template repository.
-2. Clone the new repository to your computer (GitHub's **Code** menu provides its URL); open that local folder in VS Code.
-3. Fill in [Project overview](project-overview.md), [Business rules](business-rules.md), and [Data sources](data-sources.md).
-4. Build, save, and test the application in your Power Platform DEV environment.
-5. When ready to track solution source, include the app and relevant components in an unmanaged solution in DEV, then export and unpack it using PAC CLI as described below.
-6. Preserve useful, deliberately maintained Canvas YAML/Power Fx references separately under `src/canvas-yaml/`; review local changes, commit with Git, and push to GitHub.
+This is intentionally a beginner workflow. It does not deploy changes from Git back into Power Platform.
 
 ```mermaid
 flowchart TD
-    A["GitHub template"] --> B["New project repository"]
-    B --> C["Local repository / VS Code"]
-    C --> D["Power Platform DEV"]
-    D --> E["PAC CLI / source extraction"]
-    E --> F["Git"]
-    F --> G["GitHub"]
+    A[Power Apps Studio in DEV] --> B[Save and publish]
+    B --> C[Open src/solution in the terminal]
+    C --> D[pac solution sync]
+    D --> E[Review changes in VS Code]
+    E --> F[Git commit]
+    F --> G[GitHub]
 ```
 
-## Bringing an existing application into Git
+## Repository areas
 
-1. Create a project repository from this template, clone it, and open it in VS Code.
-2. Record the existing application's purpose, data sources, and rules in `docs/`; use `docs/data-sources.md` as the canonical list/table schema reference.
-3. In the existing DEV environment, find or create an unmanaged solution and add the existing Canvas App and relevant dependencies; do not recreate the app.
-4. Save and test the app, export the solution, and use PAC CLI to unpack it into `src/solution/`.
-5. Optionally preserve selected readable YAML and important Power Fx under `src/canvas-yaml/`, keeping their reference role clear.
-6. Review the files, commit the initial source snapshot locally, and push it to GitHub.
+- `docs/` contains project documentation.
+- `src/solution/` contains the Power Platform solution project created and updated by PAC CLI.
+- `src/canvas-yaml/` contains readable Canvas YAML and important Power Fx copied for review and GitHub Copilot assistance.
+- `src/canvas-yaml/app/` contains app-level formulas such as `App.OnStart.fx` and `App.Formulas.fx`.
+- `working/input/` contains temporary material given to GitHub Copilot for troubleshooting.
+- `working/output/` contains temporary proposed corrections for review.
 
-```mermaid
-flowchart TD
-    A["Existing Power Platform DEV app"] --> B["Solution / export"]
-    B --> C["PAC CLI"]
-    C --> D["src/solution"]
-    D --> E["Local Git repository"]
-    E --> F["GitHub"]
-```
+`src/solution/` and `src/canvas-yaml/` have different purposes. PAC CLI synchronises `src/solution/`. It does not update the separate readable files under `src/canvas-yaml/`.
 
-**Solution prerequisite:** this workflow uses a DEV environment with Dataverse available for solutions, appropriate permissions, and any required licences.
-That does not mean your Canvas App must use Dataverse for its business data: it can still use SharePoint or other sources.
-If your existing app is not in a solution-capable environment or cannot be added to a solution, confirm the supported route with your administrator before following the solution commands.
-You can still track deliberately maintained reference material separately.
-Exports do not automatically include external SharePoint data, credentials, or every dependency; record what the project needs.
+Do not store passwords, tokens, credentials or sensitive business data in this repository.
 
-## PAC CLI: the small command set
+## Before starting
 
-Install Git, VS Code, and [Microsoft Power Platform CLI](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction) first; the Microsoft Power Platform Tools extension for VS Code is optional.
-Open a terminal at the **project repository root**, where `README.md` is located.
-Commands below use paths relative to that root and show one unmanaged DEV solution.
-Run only the commands you need, not the whole section blindly.
+Install:
 
-Replace every `<...>` placeholder, including the angle brackets:
-- `<ENVIRONMENT_URL>`: the actual DEV environment URL from Power Platform; do not guess it.
-- `<SOLUTION_UNIQUE_NAME>`: the solution's **unique name**, not its display name, from the solution details.
-- `<EXPORT_ZIP_PATH>`: your chosen local ZIP path under `working/output/`.
-- `<PACKED_ZIP_PATH>`: a **different** local ZIP path under `working/output/`, so the exported package is not overwritten.
+- Git
+- Visual Studio Code
+- [Microsoft Power Platform CLI](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction)
 
-The path placeholders are local files you choose, not environment IDs.
-Keep quotes around replacement values.
+The Power Platform Tools extension for VS Code is optional.
 
-### Check authentication
+## Starting a new Power Platform project
 
-```text
+1. Create a new GitHub repository from the Power Platform template.
+2. Clone the new repository to the computer.
+3. Open the repository folder in VS Code.
+4. Complete the basic documents under `docs/`.
+5. In the DEV environment, create an unmanaged Power Platform solution.
+6. Create the Canvas App inside that solution, or add the app and related components to it.
+7. Develop and test the app in Power Apps Studio.
+8. Save and publish the app.
+9. Use PAC CLI to bring the solution into `src/solution/`.
+10. Review, commit and push the generated changes.
+
+## Starting with an existing application
+
+1. Create a project repository from the Power Platform template.
+2. Clone it and open it in VS Code.
+3. Document the existing application's purpose, business rules and data sources under `docs/`.
+4. In DEV, find or create an unmanaged solution.
+5. Add the existing Canvas App and relevant components to the solution. Do not recreate the app.
+6. Save and publish the app.
+7. Use PAC CLI to bring the solution into `src/solution/`.
+8. Optionally copy useful readable Canvas YAML and Power Fx into `src/canvas-yaml/`.
+9. Review, commit and push the initial project snapshot.
+
+Using a Power Platform solution does not mean the app's business data must be stored in Dataverse. The Canvas App can continue using SharePoint or other supported data sources.
+
+## PAC CLI: first-time setup
+
+Open the VS Code terminal at the repository root, where `README.md` is located.
+
+### 1. Check authentication
+
+```powershell
 pac auth list
 ```
-Lists saved authentication profiles and marks the active one; no placeholders to replace.
-A saved profile does not guarantee its sign-in is still valid.
 
-### Authenticate when needed
+Check that the active profile points to the correct DEV environment.
 
-```text
+If authentication is needed:
+
+```powershell
 pac auth create --environment "<ENVIRONMENT_URL>"
 ```
-Signs you in and creates an active authentication profile for the DEV environment; replace `<ENVIRONMENT_URL>` with your actual DEV URL.
-Complete the interactive sign-in; never put credentials in these files.
 
-### View available environments
+Replace `<ENVIRONMENT_URL>` with the actual DEV environment URL.
 
-```text
+### 2. Check or select the DEV environment
+
+```powershell
 pac org list
 ```
-Lists environments available to the signed-in account; no placeholders to replace.
 
-### Select the DEV environment
+If required, select DEV:
 
-```text
+```powershell
 pac org select --environment "<ENVIRONMENT_URL>"
 ```
-Selects the environment for the active authentication profile; replace `<ENVIRONMENT_URL>` with the actual DEV URL.
-Confirm the selected environment is DEV before exporting.
 
-### Export an unmanaged solution
+Always confirm that DEV is selected before retrieving a solution.
+
+### 3. Go to the solution source folder
+
+From the repository root:
+
+```powershell
+cd src/solution
+```
+
+### 4. Bring the solution down for the first time
+
+Run the first-time clone command used for this project:
+
+```powershell
+pac solution clone --name "<SOLUTION_UNIQUE_NAME>"
+```
+
+Replace `<SOLUTION_UNIQUE_NAME>` with the solution's unique name, not its display name.
+
+Run this only when `src/solution/` has not yet been set up as a local solution project. Review where PAC creates the generated solution project before committing it.
+
+## PAC CLI: normal solution sync
+
+After the first-time setup, the normal workflow is much shorter.
+
+1. Make changes in Power Apps Studio.
+2. Save and publish the changes in DEV.
+3. In the VS Code terminal, go to the local solution project under `src/solution/`.
+4. Run:
+
+```powershell
+pac solution sync
+```
+
+Microsoft describes this command as synchronising the current local solution project with the current state of the solution in the selected environment.
+
+After the sync, return to the repository root if needed:
+
+```powershell
+cd ../..
+```
+
+Then review the changes in VS Code Source Control.
+
+Important:
+
+- Run `pac solution sync` from the local solution project created by PAC, not from an unrelated folder.
+- Save and publish intended DEV changes before synchronising.
+- Check the selected PAC environment before synchronising.
+- Review changed and deleted files before committing.
+- `pac solution sync` updates `src/solution/`; it does not update `src/canvas-yaml/`.
+
+See the [Microsoft PAC solution command reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution) for current options.
+
+## Readable Canvas YAML and Power Fx
+
+The PAC-generated solution source and manually copied Canvas files solve different problems:
 
 ```text
-pac solution export --name "<SOLUTION_UNIQUE_NAME>" --path "<EXPORT_ZIP_PATH>" --managed false
-```
-Exports the named unmanaged solution to a local ZIP; replace `<SOLUTION_UNIQUE_NAME>` and `<EXPORT_ZIP_PATH>` as defined above.
-Save and publish the intended DEV changes first, and use a fresh ZIP filename for a new export.
+src/solution/
+    Full solution project synchronised by PAC CLI
 
-### Unpack solution source
+src/canvas-yaml/
+    Readable Canvas YAML and Power Fx used for review and Copilot assistance
+```
+
+When useful, copy readable material from Power Apps into files such as:
 
 ```text
-pac solution unpack --zipfile "<EXPORT_ZIP_PATH>" --folder "src/solution" --packagetype Unmanaged
+src/canvas-yaml/app/App.OnStart.fx
+src/canvas-yaml/app/App.Formulas.fx
+src/canvas-yaml/HomeScreen.yaml
+src/canvas-yaml/Header.component.yaml
 ```
-Extracts the unmanaged solution ZIP into the source folder for review and Git history; replace `<EXPORT_ZIP_PATH>` with the ZIP you exported.
-Keep `"src/solution"` unchanged for this template.
-Before repeating an extraction, commit or otherwise preserve existing local work and review the resulting changes, including components removed from the live solution.
-Unpacking here does not populate or update the separate `src/canvas-yaml/` reference files.
 
-### Pack only when needed
-
-```text
-pac solution pack --zipfile "<PACKED_ZIP_PATH>" --folder "src/solution" --packagetype Unmanaged
-```
-Builds an unmanaged solution ZIP from local source; replace `<PACKED_ZIP_PATH>` with your separate output ZIP path.
-Keep `"src/solution"` unchanged.
-Packing does **not** import, deploy, or change any live environment, and it does not include separately maintained `src/canvas-yaml/` files.
-Do not treat the packed ZIP as permission to overwrite an environment; deployment is outside this beginner workflow.
-
-For current options, see Microsoft's [auth](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/auth), [org](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/org), and [solution](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution) command reference pages.
+These reference files do not automatically synchronise with Power Apps. Review suggested changes and manually apply approved changes in Power Apps Studio, then save and test the app.
 
 ## Git basics
 
-Run these commands from the project repository root.
-Cloning the GitHub project normally sets up the remote connection; GitHub authentication is separate from PAC authentication.
-Before your first commit, Git may ask you to configure your author name and email.
+Run Git commands from the repository root.
+
+### Check changes
+
+```powershell
+git status
+```
+
+### Download shared changes
+
+Use this at the beginning of work when the local working tree is clean:
+
+```powershell
+git pull
+```
+
+### Stage reviewed changes
+
+```powershell
+git add .
+```
+
+### Commit locally
+
+```powershell
+git commit -m "Describe the change"
+```
+
+Use a short message describing what changed, for example:
+
+```powershell
+git commit -m "Sync latest DEV solution"
+```
+
+### Push to GitHub
+
+```powershell
+git push
+```
+
+If Git reports a conflict or unexpected history, stop and review the message. Do not force-push or discard work just to remove the error.
+
+## Normal development cycle
 
 ```mermaid
 flowchart TD
-    A["Working files"] --> B["Git staging"]
-    B --> C["Local Git commit"]
-    C --> D["GitHub"]
+    A[git pull] --> B[Develop in Power Apps Studio]
+    B --> C[Test in DEV]
+    C --> D[Save and publish]
+    D --> E[cd src/solution]
+    E --> F[pac solution sync]
+    F --> G[Review VS Code changes]
+    G --> H[Update readable YAML only when needed]
+    H --> I[git status]
+    I --> J[git add]
+    J --> K[git commit]
+    K --> L[git push]
 ```
 
-Staging means selecting changes for the next snapshot.
-A commit saves that snapshot **locally**; pushing sends commits to GitHub.
-The “working files” in this diagram means local repository changes in general, not specifically the ignored `working/` folders.
+Beginner checklist:
 
-| Command | Plain-English meaning |
-| --- | --- |
-| `git status` | Shows changed files and what is staged; normally ignored temporary files do not appear. |
-| `git add .` | Stages all non-ignored changes under the current folder, including deletions; review first to avoid adding unwanted files. |
-| `git commit -m "Describe the change"` | Records the staged changes locally; replace `Describe the change` with a short meaningful description. |
-| `git pull` | Downloads and integrates updates from the tracked GitHub branch; use at the start of work with a clean working tree. |
-| `git push` | Uploads your local commits to the tracked GitHub branch. |
+1. Start from the repository root.
+2. Run `git status` and confirm there is no unfinished work.
+3. Run `git pull`.
+4. Make and test changes in Power Apps Studio.
+5. Save and publish in DEV.
+6. Change directory to the PAC solution project under `src/solution/`.
+7. Run `pac solution sync`.
+8. Review every change in VS Code Source Control.
+9. Update `src/canvas-yaml/` only when deliberately required.
+10. Run `git status`.
+11. Run `git add .`.
+12. Commit with a meaningful message.
+13. Run `git push`.
 
-These commands have no other placeholders to replace.
-If pull/push reports conflicts or divergent history, stop and understand the message before proceeding; do not force-push or discard work to make it disappear.
+## Troubleshooting with GitHub Copilot
 
-## Normal daily development
-
-Start with a clean local working tree and `git pull` to get any shared changes.
-Then:
-
-```mermaid
-flowchart TD
-    A["Make changes in Power Platform DEV"] --> B["Save and test"]
-    B --> C["Bring relevant source/reference changes locally"]
-    C --> D["Review changes in VS Code Source Control"]
-    D --> E["git status"]
-    E --> F["git add ."]
-    F --> G["git commit"]
-    G --> H["git push"]
-    H --> I["GitHub"]
-```
-
-Use the commit command with a meaningful message as shown above.
-For solution changes, export and unpack the relevant solution; for manual reference changes, deliberately copy the approved YAML/Power Fx.
-Review exactly what will be committed, including unexpected generated files or sensitive data.
-This process records changes; it does not deploy from Git or automatically overwrite Power Platform.
-
-## Troubleshooting with Copilot
+For a small Power Fx or YAML problem:
 
 ```text
 Power Apps
-  → copy problematic Power Fx / YAML into working/input
-  → Copilot analyses / fixes
-  → proposed correction in working/output when useful
-  → you review
-  → you manually apply the approved change
+    ↓
+Copy the problem into working/input/
+    ↓
+Ask GitHub Copilot to analyse it
+    ↓
+Put a larger proposed correction in working/output/ when useful
+    ↓
+Review the proposal
+    ↓
+Apply the approved change manually in Power Apps
+    ↓
+Save and test
+    ↓
+Synchronise the solution when ready
 ```
 
-Copilot may edit temporary input files when asked to troubleshoot them.
-Asking to “check”, “review”, “fix this Power Fx”, or “troubleshoot” does **not** authorise changes to original files in `src/canvas-yaml/`.
-Copilot should analyse first, show a small proposed Power Fx replacement in its response, or put a larger proposed YAML correction in `working/output/`.
-Clearly ask to apply/edit/change the original source when you actually want that source modified.
-After manually applying a fix in Power Apps, save and test it before deliberately updating any maintained source/reference snapshot.
+Asking GitHub Copilot to check or troubleshoot a file does not automatically authorise changes to preserved files under `src/`. Ask explicitly if an original file should be edited.
